@@ -46,6 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -53,12 +59,32 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="IdManagement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IdManagement.Designer.cs">
+      <DependentUpon>IdManagement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InputPrompt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InputPrompt.Designer.cs">
+      <DependentUpon>InputPrompt.cs</DependentUpon>
+    </Compile>
     <Compile Include="IO.cs" />
-    <Compile Include="ManualTree.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IdManagement.resx">
+      <DependentUpon>IdManagement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InputPrompt.resx">
+      <DependentUpon>InputPrompt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

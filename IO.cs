@@ -19,7 +19,7 @@ namespace FTreeViewer
 
             int _maxProp = 30;
             int iP = 0;
-            Person[] personList = new Person[_maxEntities];
+            int[] personId = new int[_maxEntities];
             int[] personMumId = new int[_maxEntities];
             int[] personDadId = new int[_maxEntities];
             string[] personFirst = new string[_maxEntities];
@@ -65,7 +65,8 @@ namespace FTreeViewer
                     if (!int.TryParse(prop[0], out id)) issues.Add((lineCounter, 0));
                     if (id < -1) id = -1;
                     if (id > _maxEntities - 1) throw new ArgumentOutOfRangeException("File contains exceeding ids. Current limit: "+_maxEntities+", id parsed: "+id+", on line: "+lineCounter);
-                    
+                    personId[iP] = id;
+
                     if (prop[1] == _null || !int.TryParse(prop[1], out personMumId[iP])) personMumId[iP] = -1;
                     else issues.Add((lineCounter, 1));
                     if (prop[2] == _null || !int.TryParse(prop[2], out personDadId[iP])) personDadId[iP] = -1;
@@ -101,23 +102,22 @@ namespace FTreeViewer
             // TODO figure out a way to sort and fill holes if there is a need to (in case of missing entries in between)
             for (int i = 0; i < iP; i++)
             {
-                CreatePerson(personFirst[i], personFull[i]);
+                CreatePerson(personFirst[i], personFull[i], personId[i]);
             }
             for (int i = 0; i < iP; i++)
             {
-                //if (personMumId[i] != -1) personList[i].ParentMom = People[personMumId[i]];
-                //if (personDadId[i] != -1) personList[i].ParentDad = People[personDadId[i]];
-                if (personMumId[i] != -1) People[i].ParentMom = People[personMumId[i]];
-                if (personDadId[i] != -1) People[i].ParentDad = People[personDadId[i]];
+                int id = personId[i];
+                if (personMumId[i] != -1) People[id].ParentMum = People[personMumId[i]];
+                if (personDadId[i] != -1) People[id].ParentDad = People[personDadId[i]];
                 
-                People[i].undefinedPos = personUndefinedPos[iP];
-                if (!People[i].undefinedPos)
+                People[id].undefinedPos = personUndefinedPos[i];
+                if (!People[id].undefinedPos)
                 {
-                    People[i].Pos.X = personPos[i].X;
-                    People[i].Pos.Y = personPos[i].Y;
+                    People[id].Pos.X = personPos[i].X;
+                    People[id].Pos.Y = personPos[i].Y;
                 }
-
             }
+            Data.SetUndefinedPosPeople();
         }
         public static void WriteCSV(string str)
         {
@@ -127,8 +127,9 @@ namespace FTreeViewer
             for (int i = 0; i < GetAmountPeople(); i++)
             {
                 Person p = People[i];
+                if (p == null) continue;
                 arr = Encoding.ASCII.GetBytes(string.Format(_datasetFormat, p.id,
-                    p.ParentMom == null ? _null : p.ParentMom.id.ToString(), p.ParentDad == null ? _null : p.ParentDad.id.ToString(),
+                    p.ParentMum == null ? _null : p.ParentMum.id.ToString(), p.ParentDad == null ? _null : p.ParentDad.id.ToString(),
                     p.FirstName, p.FullName, p.undefinedPos ? _null : p.Pos.X.ToString(), p.undefinedPos ? _null : p.Pos.Y.ToString()));
                 fs.Write(arr, 0, arr.Length);
             }

@@ -19,8 +19,10 @@ namespace FTreeViewer
 		}
 		private void Form1_Load(object sender, EventArgs e)
         {
-            foreach (Control control in this.Controls) // disables navigation with arrows
+			contextMenuStrip1.AutoClose = false;
+			foreach (Control control in this.Controls) // disables navigation with arrows
 				control.PreviewKeyDown += new PreviewKeyDownEventHandler(control_PreviewKeyDown);
+			Timer_Ticker.Interval = 35;
 			Timer_Ticker.Start();
 			Data.NEW();
         }
@@ -63,8 +65,8 @@ namespace FTreeViewer
 				for (int i = 0; i < Data.People.Length; i++)
 				{
 					Person p = Data.People[i];
-					if (p == null) break;
-					if (p.ParentMom != null) listParents.Add(p.ParentMom);
+					if (p == null) continue;
+					if (p.ParentMum != null) listParents.Add(p.ParentMum);
 					if (p.ParentDad != null) listParents.Add(p.ParentDad);
 					foreach (var parent in listParents)
 					{
@@ -84,7 +86,7 @@ namespace FTreeViewer
 				for (int i = 0; i < Data.People.Length; i++)
 				{
 					Person p = Data.People[i];
-					if (p == null) break;
+					if (p == null) continue;
 					g.FillEllipse(Brushes.White, Tools.ToScreenRect(p.Pos.X, p.Pos.Y, new Size(Data._size, Data._size)));
 
 					Pen cpen;
@@ -101,13 +103,18 @@ namespace FTreeViewer
 					else
 						cpen = Pens.Black;
 					g.DrawEllipse(cpen, Tools.ToScreenRect(p.Pos.X, p.Pos.Y, new Size(Data._size, Data._size)));
-					
-					g.DrawString(p.FirstName+" "+p.FullName, SystemFonts.DefaultFont, sb, Tools.ToScreenPoint(p.Pos.X, p.Pos.Y));
+
+					string ds = p.FirstName + " " + p.FullName + " " + p.id;
+					RectangleF rectText = new RectangleF(
+						(PointF)Tools.ToScreenPoint(p.Pos.X, p.Pos.Y), g.MeasureString(ds, SystemFonts.DefaultFont));
+					//g.FillRectangle(new SolidBrush(Color.FromArgb(200, Color.White)), rectText);
+					g.DrawString(ds, SystemFonts.DefaultFont, sb, rectText.X, rectText.Y);
 					//g.DrawString(string.Join(",", p.numConnecting), SystemFonts.DefaultFont, sb, Tools.ToScreenPoint(p.Pos.X, p.Pos.Y - 30));
 					//g.DrawString("C=" + p.centrality.ToString("00.0"), SystemFonts.DefaultFont, sb, Tools.ToScreenPoint(p.Pos.X, p.Pos.Y - 40));
 				}
 
-				if (nUD_Id.Value != -1 && nUD_Id.Value < Data.People.Length)
+				if (nUD_Id.Value != -1 && nUD_Id.Value < Data.People.Length
+					&& Data.People[(int)nUD_Id.Value] != null)
 				{
 					var pos = Data.People[(int)nUD_Id.Value].Pos;
 					g.FillEllipse(Brushes.Green, Tools.ToScreenRect(0,0, new Size(25,25)));
@@ -141,8 +148,8 @@ namespace FTreeViewer
 		private byte ButtonFlags = 0x00;
 		private void Form1_MouseWheel(object sender, MouseEventArgs e)
 		{
-			ViewPort.scaleX *= e.Delta > 0 ? 1f + Config.scaleAccelerator : 1f - Config.scaleAccelerator;
-			ViewPort.scaleY *= e.Delta > 0 ? 1f + Config.scaleAccelerator : 1f - Config.scaleAccelerator;
+			ViewPort.scaleX *= e.Delta > 0 ? 1d + Config.scaleAccelerator : 1d - Config.scaleAccelerator;
+			ViewPort.scaleY *= e.Delta > 0 ? 1d + Config.scaleAccelerator : 1d - Config.scaleAccelerator;
 			if (ViewPort.scaleX < 0.1f) { ViewPort.scaleX = 0.1f; ViewPort.scaleY = 0.1f; }
 			else if (ViewPort.scaleX > 2.5f) { ViewPort.scaleX = 2.5f; ViewPort.scaleY = 2.5f; }
 			Config.playerMoveStep = (int)(Config._constPlayerMoveStep / ViewPort.scaleX);
@@ -161,7 +168,7 @@ namespace FTreeViewer
         private void Timer_Ticker_Tick(object sender, EventArgs e)
         {
 			
-			if (ButtonFlags != 0x00)
+			if (!isDragging && ButtonFlags != 0x00)
             {
 				double x, y;
 				
@@ -206,8 +213,17 @@ namespace FTreeViewer
 				var pp = PointToClient(Cursor.Position);
 				var p = Tools.ToDigitalPoint(pp.X, pp.Y);
 				Data.People[dragSelectedObjectId].Pos = (p.X, p.Y);
+				Data.People[dragSelectedObjectId].undefinedPos = false;
 				CanvasToBeChanged = true;
             }
+			if (isDragging)
+            {
+				var p = PointToClient(Cursor.Position);
+				Point deltaP = new Point(p.X - draggingRefPointClient.X, p.Y - draggingRefPointClient.Y);
+				ViewPort.cameraPosX = (int)(draggingRefPointCameraPos.X - deltaP.X / ViewPort.scaleX);
+				ViewPort.cameraPosY = (int)(draggingRefPointCameraPos.Y + deltaP.Y / ViewPort.scaleY);
+				CanvasToBeChanged = true;
+			}
 			
 			if (!CanvasToBeChanged) return;
 			CanvasToBeChanged = false;
@@ -218,6 +234,8 @@ namespace FTreeViewer
 			CanvasToBeChanged = true;
 		}
 		int seedCount = 1337;
+        
+		#region other stuff -----------------------------------------------------------------------
         private void btnNewLayout_Click(object sender, EventArgs e)
         {
 			Data.rand = new Random(seedCount++);
@@ -272,8 +290,12 @@ namespace FTreeViewer
         private void nUD_Id_ValueChanged(object sender, EventArgs e)
         {
 			if (Data.GetAmountPeople() <= nUD_Id.Value) return;
-			lblIdSelected.Text = nUD_Id.Value == -1 ? "< not selected >"
-				: Data.People[(int)nUD_Id.Value].FirstName + " "+ Data.People[(int)nUD_Id.Value].FullName;
+			if (nUD_Id.Value == -1)
+				lblIdSelected.Text = "< not selected >";
+			else if (Data.People[(int)nUD_Id.Value] != null)
+				lblIdSelected.Text = Data.People[(int)nUD_Id.Value].FirstName + " " + Data.People[(int)nUD_Id.Value].FullName;
+			else
+				lblIdSelected.Text = "";
 			CanvasToBeChanged = true;
         }
         private void btnIdReset_Click(object sender, EventArgs e)
@@ -292,7 +314,7 @@ namespace FTreeViewer
 			if (false)
             {
 				Data.NEW();
-				Data.DEPRECATEDReadManualData();
+				//Data.DEPRECATEDReadManualData();
                 return;
             }
 
@@ -301,45 +323,249 @@ namespace FTreeViewer
 			string s = openFileDialog1.FileName;
 			Data.ReadCSV(s);
 
-			nUD_Id.Maximum = Data.GetAmountPeople() - 1;
+			UpdateNUD_limits();
 			CanvasToBeChanged = true;
+		}
+		private void UpdateNUD_limits()
+        {
+			int x = Data.GetAmountPeople() - 1;
+			nUD_NLStartNode.Maximum = x;
+			nUD_Id.Maximum = x;
 		}
 
 		private DateTime timeToStartDragging = DateTime.MinValue;
 		private bool dragSelectedObject = false;
 		private int dragSelectedObjectId = -1;
+		private bool contextMenuFlag = false;
+		private bool isDragging = false;
+		private Point draggingRefPointClient;
+		private Point draggingRefPointCameraPos;
 		private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-			if (e.Button != MouseButtons.Left) return;
-			
-			Point p = Tools.ToDigitalPoint(e.X, e.Y);
-		    int selected = -1;
-			for (int i = 0; i < Data.GetAmountPeople(); i++)
-			{
-				var p2 = Data.People[i].Pos;
-				if (Tools.GetVectLength(p.X - p2.X, p.Y - p2.Y) < Data._size * 0.5)
+
+
+			if (e.Button == MouseButtons.Middle)
+            {
+				if (isDragging)
+                {
+					
+				}
+                else
+                {
+					isDragging = true;
+					draggingRefPointClient = PointToClient(Cursor.Position);
+					draggingRefPointCameraPos = new Point(ViewPort.cameraPosX,ViewPort.cameraPosY);
+					Cursor = Cursors.SizeAll;
+				}
+
+			}
+
+			// context menu and selection
+			if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
+            {
+
+				Point p = Tools.ToDigitalPoint(e.X, e.Y);
+				int selected = -1;
+				for (int i = 0; i < Data.GetAmountPeople(); i++)
 				{
-					selected = i;
-					break;
+					if (Data.People[i] == null) continue;
+					var p2 = Data.People[i].Pos;
+					if (Tools.GetVectLength(p.X - p2.X, p.Y - p2.Y) < Data._size * 0.5)
+					{
+						selected = i;
+						break;
+					}
+				}
+
+				TSM_Reset(true);
+				if (selected == -1)
+				{
+					if (e.Button == MouseButtons.Right)
+					{
+						TSMI_CancelSetParent();
+					}
+					else if (e.Button == MouseButtons.Left)
+					{
+						if (TSMI_selectNewParentFlag != 0)
+						{
+							TSMI_SetParent((int)nUD_Id.Value, -1);
+							CanvasToBeChanged = true;
+						}
+						else
+							nUD_Id.Value = -1;
+					}
+				}
+				else
+				{
+					//CanvasToBeChanged = true;
+					if (e.Button == MouseButtons.Right)
+					{
+						if (TSMI_selectNewParentFlag != 0)
+							TSMI_CancelSetParent();
+						else
+						{
+							nUD_Id.Value = selected;
+							contextMenuFlag = true;
+							contextMenuStrip1.BringToFront();
+							contextMenuStrip1.Show(PointToScreen(e.Location));
+						}
+					}
+					else if (e.Button == MouseButtons.Left)
+					{
+						if (TSMI_selectNewParentFlag != 0)
+						{
+							TSMI_SetParent((int)nUD_Id.Value, selected);
+							CanvasToBeChanged = true;
+						}
+						else
+						{
+							nUD_Id.Value = selected;
+							dragSelectedObject = true;
+							dragSelectedObjectId = selected;
+							timeToStartDragging = DateTime.Now.AddSeconds(0.15);
+						}
+					}
 				}
 			}
-			if (selected == -1)
-            {
-				nUD_Id.Value = -1;
-			}
-            else
-            {
-				nUD_Id.Value = selected;
-				CanvasToBeChanged = true;
-				timeToStartDragging = DateTime.Now.AddSeconds(0.35);
-				dragSelectedObject = true;
-				dragSelectedObjectId = selected;
-			}		
+			
 		}
         private void Form1_MouseUp(object sender, MouseEventArgs e)
         {
+			isDragging = false;
+			Cursor = Cursors.Default;
 			dragSelectedObject = false;
         }
+        private int TSMI_selectNewParentFlag = 0;
+		private void fatherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+			contextMenuStrip1.Close();
+			TSMI_selectNewParentFlag = 2;
+			Cursor = Cursors.Cross;
+		}
+        private void motherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+			contextMenuStrip1.Close();
+			TSMI_selectNewParentFlag = 1;
+			Cursor = Cursors.Cross;
+		}
+        private void fullNameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+			TSM_Reset(true);
+			string input;
+            if (InputPrompt("edit: Full name", Data.People[(int)nUD_Id.Value].FullName, out input))
+            {
+				Data.People[(int)nUD_Id.Value].FullName = input;
+				CanvasToBeChanged = true;
+			}
+        }
+        private void nameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+			TSM_Reset(true);
+			string input;
+			if (InputPrompt("edit: Name", Data.People[(int)nUD_Id.Value].FirstName, out input))
+			{
+				Data.People[(int)nUD_Id.Value].FirstName = input;
+				CanvasToBeChanged = true;
+			}
+		}
+		private bool TSMI_deleteFlag = false;
+		private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+			if (TSMI_deleteFlag)
+            {
+				contextMenuStrip1.Close();
+				int id = (int)nUD_Id.Value;
+				nUD_Id.Value = -1;
+				Data.DeletePerson(id);
+			}
+			TSMI_SetDeleteState(!TSMI_deleteFlag);
+		}
+		private void contextMenuStrip1_Closing(object sender, ToolStripDropDownClosingEventArgs e)
+		{
+			if (false && e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
+				e.Cancel = true;
+		}
+		private void TSMI_SetDeleteState(bool b)
+        {
+			TSMI_deleteFlag = b;
+			deleteToolStripMenuItem.Text = b ? "< confirm >" : "Delete";
+		}
+		private void TSMI_CancelSetParent()
+        {
+			TSMI_selectNewParentFlag = 0;
+			Cursor = Cursors.Default;
+        }
+		private void TSMI_SetParent(int idSelected, int idTarget)
+		{
+			if (TSMI_selectNewParentFlag == 1) // mum					
+				Data.People[idSelected].ParentMum = idTarget == -1 ? null : Data.People[idTarget];
+			if (TSMI_selectNewParentFlag == 2) // dad
+				Data.People[idSelected].ParentDad = idTarget == -1 ? null : Data.People[idTarget];
+			TSMI_selectNewParentFlag = 0;
+			Cursor = Cursors.Default;
+		}
+		private void TSM_Reset(bool doClose = false)
+        {
+			TSMI_SetDeleteState(false);
+			if (doClose)
+            {
+				contextMenuStrip1.Close();
+				contextMenuFlag = false;
+			}	
+        }
+		private bool InputPrompt(string title, string startText, out string input)
+        {
+			var ip = new InputPrompt();
+			ip.Text = title;
+			ip.textBox1.Text = startText;
+			ip.ShowDialog(this);
+			if (ip.ApplyFlag) input = ip.textBox1.Text;
+			else input = "";
+			return ip.ApplyFlag;
+        }
+        private void btnNewPerson_Click(object sender, EventArgs e)
+        {
+			FormCreatePerson();
+			
+        }
+		public void FormCreatePerson(int forceId = -1)
+        {
+			int id = Data.CreatePerson("", "", forceId);
+			UpdateNUD_limits();
+			if (id == -1) return;
+			Data.People[id].Pos = (50, 50);
+			nUD_Id.Value = id;
+			CanvasToBeChanged = true;
+		}
+
+        private void nUD_NLStartNode_ValueChanged(object sender, EventArgs e)
+        {
+			int x = (int)nUD_NLStartNode.Value;
+            Data.initialPerson = x;
+        }
+
+        private void btnJump_Click(object sender, EventArgs e)
+        {
+			int id = (int)nUD_Id.Value;
+			if (id == -1 || Data.People[id] == null) return;
+			ViewPort.cameraPosX = Data.People[id].Pos.X;
+            ViewPort.cameraPosY = Data.People[id].Pos.Y;
+			ViewPort.player1.X = Data.People[id].Pos.X;
+            ViewPort.player1.Y = Data.People[id].Pos.Y;
+            CanvasToBeChanged = true;
+        }
+        #endregion
+
+        private void btnAbout_Click(object sender, EventArgs e)
+        {
+			About FAbout = new About();
+			FAbout.ShowDialog(this);
+        }
+        private void btnIdManagement_Click(object sender, EventArgs e)
+        {
+			IdManagement FIdManagement = new IdManagement(this);
+			FIdManagement.ShowDialog(this);
+		}
     }
     static class Config
 	{
@@ -357,8 +583,8 @@ namespace FTreeViewer
 
 			windowFreeWalkAreaPerc = 30; // size of the edge area in percent of the width & height
 
-		public static float
-			scaleAccelerator = 0.1f;
+		public static double
+			scaleAccelerator = 0.1d;
 
 		public static Random rand = new Random(1337);
 
@@ -366,10 +592,22 @@ namespace FTreeViewer
 	static class ViewPort
 	{
 		public static double _globalStepFactor = 1; // constant after load
-		public static float scaleX = 1f, scaleY = 1f, fpsReal = 0;
+		public static double scaleX = 1d, scaleY = 1d, fpsReal = 0;
 		public static int fpsFrames = 0, fpsSecond = 0;
 		public static int windX = 0, windY = 0;
-		public static int cameraPosX = 0, cameraPosY = 0;
+		private static int _cameraPosX = 0, _cameraPosY = 0;
+		public static int cameraPosX
+        {
+            get { return _cameraPosX; }
+            set { player1 = new Point(value,_cameraPosY); 
+				_cameraPosX = value; }
+        }
+		public static int cameraPosY
+		{
+			get { return _cameraPosY; }
+			set { player1 = new Point(_cameraPosX,value);
+				_cameraPosY = value; }
+		}
 		public static Point mousePos = new Point(0,0); // is updated
 		public static Point player1MoveVect = new Point(0, 0);
 		public static Point player1 = new Point(0, 0), player2 = new Point(0, 0);
@@ -431,7 +669,7 @@ namespace FTreeViewer
 		}
 		public static SizeF ToScreenSizeF(double sizeX = 0, double sizeY = 0)
 		{
-			return new SizeF((float)sizeX * ViewPort.scaleX, (float)sizeY * ViewPort.scaleY);
+			return new SizeF((float)(sizeX * ViewPort.scaleX), (float)(sizeY * ViewPort.scaleY));
 		}
 		// same thing as ToScreenRect, but with removed size parameter
 		public static Point ToScreenPoint(int posX, int posY)
@@ -479,11 +717,16 @@ namespace FTreeViewer
 			double full = 2 * Math.PI;
 			if (x == 0)
 			{
-				if (y == 0) throw new Exception();
+				if (y == 0) ;  // do nothing ?  //throw new Exception();
 				else if (y < 0) return full * 0.75;
 				else if (y > 0) return full * 0.25;
 			}
-			else if (x > 0 && y > 0)
+            else if (y == 0)
+            {
+				if (x < 0) return full * 0.5;
+                else if (x > 0) return full * 0.0;
+            }
+            else if (x > 0 && y > 0)
 			{
 				return Math.Atan(y / x);
 			}
@@ -504,11 +747,7 @@ namespace FTreeViewer
 		private static double AddPhi(double phi, double addition)
         {
 			double full = 2 * Math.PI;
-			if (addition > 0)
-				return (phi + addition) % full;
-			else if (addition < 0)
-				return Math.Abs(phi + addition) % full;
-			return phi;
+			return (phi + addition >= 0 ? 0 : full) + (phi + addition) % full;
 		}
 	}
 }

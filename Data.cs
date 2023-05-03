@@ -11,8 +11,9 @@ namespace FTreeViewer
 
         public static int
             _size = 50,
-            _maxEntities = 100;
-        
+            _maxEntities = 100,
+            initialPerson = -1;
+
         public static Person[] People;
         private static int iPeople;
         public static void NEW()
@@ -25,49 +26,122 @@ namespace FTreeViewer
         {
             for (int i = 0; i < iPeople + 1; i++)
             {
+                if (People[i] == null) continue;
                 People[i].undefinedPos = true;
                 People[i].Pos = (0, 0);
             }
         }
-        public static int CreatePerson(string firstName, string fullName)
+        public static int CreatePerson(string firstName, string fullName, int forceId = -1)
         {
-            /// TODO Exception will occur on i overflow
-            int id = ++iPeople;
+            int id;
+            if (forceId == -1)
+            {
+                if (iPeople == People.Length - 1)
+                    return -1;
+                id = ++iPeople;
+            }
+            else
+            {
+                id = forceId;
+                if (forceId > iPeople)
+                    iPeople = forceId;
+            }
             People[id] = new Person(id, firstName, fullName);
             People[id].id = id;
             return id;
         }
         public static void SetFather(int idPerson, int idFather)
-        {    
+        {
+            if (People[idPerson] == null) return;
             People[idPerson].ParentDad = idFather == -1 ? null : People[idFather];
         }
         public static void SetMother(int idPerson, int idMother)
         {
-            People[idPerson].ParentMom = idMother == -1 ? null : People[idMother];
+            if (People[idPerson] == null) return;
+            People[idPerson].ParentMum = idMother == -1 ? null : People[idMother];
         }
         public static int GetIdFather(int idPerson)
         {
+            if (People[idPerson] == null) return -1;
             return People[idPerson].ParentDad == null ? -1 : People[idPerson].ParentDad.id;
         }
         public static int GetIdMother(int idPerson)
         {
-            return People[idPerson].ParentMom == null ? -1 : People[idPerson].ParentMom.id;
+            if (People[idPerson] == null) return -1;
+            return People[idPerson].ParentMum == null ? -1 : People[idPerson].ParentMum.id;
         }
         public static int GetAmountPeople()
         {
             return iPeople+1;
+        }
+        public static void DeletePerson(int idPerson)
+        {
+            if (People[idPerson] == null) return;
+            Person p = People[idPerson];
+            p.ParentDad = null;
+            p.ParentMum = null;
+            var arr = p.Children.ToArray();
+            for (int i = 0; i < arr.Length; i++)
+            {
+                Person child = arr[i];
+                if (child.ParentMum == p) child.ParentMum = null;
+                if (child.ParentDad == p) child.ParentDad = null;
+            }
+            People[idPerson] = null;
+        }
+        public static void PersonChangeId(int idPerson, int NewIdPerson)
+        {
+            if (People[idPerson] == null || People[NewIdPerson] != null) throw new Exception();
+
+            Person pOld = People[idPerson];
+            if (CreatePerson(pOld.FirstName, pOld.FullName, NewIdPerson) != NewIdPerson) throw new Exception();
+            Person NewP = People[NewIdPerson];
+            NewP.ParentMum = pOld.ParentMum;
+            NewP.ParentDad = pOld.ParentDad;
+            NewP.undefinedPos = pOld.undefinedPos;
+            NewP.Pos = pOld.Pos;
+            pOld.ParentDad = null;
+            pOld.ParentMum = null;
+            var arr = pOld.Children.ToArray();
+            var arrMum = new bool[arr.Length];
+            var arrDad = new bool[arr.Length];
+            for (int i = 0; i < arr.Length; i++)
+            {
+                Person child = arr[i];
+                if (child.ParentMum == pOld)
+                {
+                    arrMum[i] = true;
+                    child.ParentMum = null;
+                }
+                if (child.ParentDad == pOld)
+                {
+                    arrDad[i] = true;
+                    child.ParentDad = null;
+                }
+            }
+            for (int i = 0; i < arr.Length; i++)
+            {
+                if (arrMum[i])
+                    arr[i].ParentMum = People[NewIdPerson];
+                if (arrDad[i])
+                    arr[i].ParentDad = People[NewIdPerson];
+            }
+            People[idPerson] = null;
         }
         public static void CalculatePositioning()
         {
             if (iPeople == -1) return;
             ResetPositions();
 
-            Node.InherentConnectionNodesFromPerson();
-            Node.GetAmountNodesPerConnection(People[0].n);
+            Node.RecreateAll();
+            Node.DeriveConnectionNodesFromPerson();
+            //Node.GetAmountNodesPerConnection(People[0].n);
 
+            //  calculation of centrality
             int[][] x = new int[20][];
             for (int iP = 0; iP < x.Length; iP++)
             {
+                if (People[iP] == null) continue;
                 x[iP] = Node.GetAmountNodesPerConnection(People[iP].n);
                 Node.Reset();
                 People[iP].numConnecting.Clear();
@@ -78,14 +152,19 @@ namespace FTreeViewer
                     // subtracts the smallest. So the values are adjusted for relative difference. Avg is calculated afterwards
                     int _smallest = People[iP].numConnecting[0], sum = 0;
                     for (int i = 1; i < People[iP].numConnecting.Count; i++)
-                        if (People[iP].numConnecting[i] < _smallest)
+                        if (People[iP] != null && People[iP].numConnecting[i] < _smallest)
                             _smallest = People[iP].numConnecting[i];
                     for (int i = 0; i < People[iP].numConnecting.Count; i++)
                         sum += People[iP].numConnecting[i] - _smallest;
                     People[iP].centrality = (double)sum / People[iP].numConnecting.Count;
                 }
             }
-            Person rootP = People[1];
+            if (initialPerson == -1 || People[initialPerson] == null)
+            {
+                SetUndefinedPosPeople();
+                return;
+            }
+            Person rootP = People[initialPerson]; 
             double smallest = rootP.centrality;
             if (false)
             {
@@ -143,7 +222,7 @@ namespace FTreeViewer
                     {
                         Person p = selectedNodes[iList];
                         if (p.ParentDad != null && nodes[iList][i] == p.ParentDad.n
-                            || p.ParentMom != null && nodes[iList][i] == p.ParentMom.n)
+                            || p.ParentMum != null && nodes[iList][i] == p.ParentMum.n)
                             listA.Add(nodes[iList][i]);
                         else
                             listB.Add(nodes[iList][i]);
@@ -251,7 +330,7 @@ namespace FTreeViewer
             while (i < dir.Count)
             {
                 if (p == null) break;
-                p = dir[i++] ? p.ParentDad : p.ParentMom;
+                p = dir[i++] ? p.ParentDad : p.ParentMum;
             }
             return p;
         }
@@ -260,7 +339,7 @@ namespace FTreeViewer
             int cc = 0;
             for (int i = 0; i < iPeople+1; i++)
             {
-                if (!People[i].undefinedPos) continue;
+                if (People[i] == null || !People[i].undefinedPos) continue;
                 People[i].Pos = (-500, 1000);
                 People[i].Pos.X += 100 * (cc % 10);
                 People[i].Pos.Y -= 100 * (cc++ / 10);
@@ -285,10 +364,10 @@ namespace FTreeViewer
         public (int X, int Y) Pos = (0,0);
         public Person(int id, string firstName, string fullName, Person mom = null, Person dad = null)
         {
-            this.id = id; FirstName = firstName; FullName = fullName; ParentMom = mom; ParentDad = dad;
+            this.id = id; FirstName = firstName; FullName = fullName; ParentMum = mom; ParentDad = dad;
             n = Node.New(this);
         }
-        public Person ParentMom
+        public Person ParentMum
         {
             get { return parentMom; }
             set {
@@ -365,6 +444,19 @@ namespace FTreeViewer
         {
             return n.p;
         }
+        public static void RecreateAll()
+        {
+            DeleteAll();
+            for (int i = 0; i < Data.GetAmountPeople(); i++)
+            {
+                if (Data.People[i] != null)
+                {
+                    New(Data.People[i]);
+                    Data.People[i].n = nodes[iNodes];
+                }
+                    
+            }
+        }
         public static void DeleteAll()
         {
             nodes = new Node[100];
@@ -378,17 +470,18 @@ namespace FTreeViewer
                 n.flag = false; n.myNum = -1; n.shared = false;
             }
         }
-        public static void InherentConnectionNodesFromPerson()
+        public static void DeriveConnectionNodesFromPerson()
         {
-            for (int i = 0; i < iNodes; i++)
+            for (int i = 0; i < iNodes + 1; i++)
             {
-                bool b1 = nodes[i].p.ParentMom == null, b2 = nodes[i].p.ParentDad == null;
-                Node[] arr = new Node[nodes[i].p.Children.Count + (b1 ? 0 : 1) + (b2 ? 0 : 1)];
-                for (int i2 = 0; i2 < nodes[i].p.Children.Count; i2++)
-                    arr[i2] = nodes[i].p.Children[i2].n;
-                if (!b1) arr[arr.Length - 1] = nodes[i].p.ParentMom.n;
-                if (!b2) arr[arr.Length - (b1 ? 1 : 2)] = nodes[i].p.ParentDad.n;
-                nodes[i].connections = arr;
+                Node n = nodes[i];
+                bool b1 = n.p.ParentMum == null, b2 = n.p.ParentDad == null;
+                Node[] arr = new Node[n.p.Children.Count + (b1 ? 0 : 1) + (b2 ? 0 : 1)];
+                for (int i2 = 0; i2 < n.p.Children.Count; i2++)
+                    arr[i2] = n.p.Children[i2].n;
+                if (!b1) arr[arr.Length - 1] = n.p.ParentMum.n;
+                if (!b2) arr[arr.Length - (b1 ? 1 : 2)] = n.p.ParentDad.n;
+                n.connections = arr;
             }
         }
         public static int[] GetAmountNodesPerConnection(Node node)
