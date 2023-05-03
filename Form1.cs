@@ -245,8 +245,8 @@ namespace FTreeViewer
 		}
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-			switch (e.KeyCode)
-			{
+			switch (e.KeyCode) // TODO fix down arrow getting stuck
+            {
 				case Keys.W:
 					ButtonFlags |= 0b00001000; break;
 				case Keys.A:
