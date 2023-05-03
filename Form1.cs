@@ -181,10 +181,10 @@ namespace FTreeViewer
 						- ((ButtonFlags & 0b00100000) != 0x0 ? 1 : 0));
                 x = Math.Abs(x) >= 1 ? x : x == 0 ? 0 : 1;
 				y = Math.Abs(y) >= 1 ? y : y == 0 ? 0 : 1;
-				x += Config.playerMoveStep *
+				x += smallstepsize / 20 *
 						(((ButtonFlags & 0b00000001) != 0x0 ? 1 : 0)
 						- ((ButtonFlags & 0b00000100) != 0x0 ? 1 : 0));
-				y += Config.playerMoveStep *
+				y += smallstepsize / 20 *
 						(((ButtonFlags & 0b00001000) != 0x0 ? 1 : 0)
 						- ((ButtonFlags & 0b00000010) != 0x0 ? 1 : 0));
 				ViewPort.player1MoveVect.X = (int)x;
