@@ -19,7 +19,7 @@ namespace FTreeViewer
         private void About_Load(object sender, EventArgs e)
         {
             linktext = linkLabel1.Text;
-            lblAppVersion.Text = "Application Version:\n"+ meta.VERSION + " " + meta.VERSION_TYPE + " - " + meta.VERSION_DATE;
+            lblAppVersion.Text = "Application Version:\n"+ Config.meta.VERSION + " " + Config.meta.VERSION_TYPE + " - " + Config.meta.VERSION_DATE;
         }
         string linktext;
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -34,13 +34,5 @@ namespace FTreeViewer
                 linkLabel1.Text = linkLabel1.Text + " [ ! ]";
             }
         }
-
-        public static class meta
-        {
-            public static string VERSION = "0.1.0";
-            public static string VERSION_TYPE = "Debug";
-            public static string VERSION_DATE = "May 2023";
-        }
-
     }
 }

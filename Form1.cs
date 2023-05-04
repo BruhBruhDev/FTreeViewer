@@ -26,8 +26,15 @@ namespace FTreeViewer
 			Timer_Ticker.Start();
 			Data.NEW();
         }
-		// disables navigation with arrows
-		void control_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+			ConfirmCloseDialog form = new ConfirmCloseDialog();
+			var r = form.ShowDialog(this);
+			if (r != DialogResult.OK)
+				e.Cancel = true;
+        }
+        // disables navigation with arrows
+        void control_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
 			if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down || e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
 				e.IsInputKey = true;
@@ -43,8 +50,9 @@ namespace FTreeViewer
 
 
 			SolidBrush sb = new SolidBrush(Color.Black);
-			Pen pen = new Pen(Color.Red);
-
+			Pen pen = new Pen(Color.Red),
+				penPurple = new Pen(Color.Purple),
+				penBlue = new Pen(Color.Blue);
 
 			/*
 			g.FillRectangle(sb,Tools.ToScreenRect(20,20, new Size(10,10)));
@@ -62,14 +70,24 @@ namespace FTreeViewer
             {
 				// arrows
 				List<Person> listParents = new List<Person>();
+				List<bool> listGender = new List<bool>();
 				for (int i = 0; i < Data.People.Length; i++)
 				{
 					Person p = Data.People[i];
 					if (p == null) continue;
-					if (p.ParentMum != null) listParents.Add(p.ParentMum);
-					if (p.ParentDad != null) listParents.Add(p.ParentDad);
-					foreach (var parent in listParents)
+					if (p.ParentMum != null)
 					{
+                        listParents.Add(p.ParentMum);
+						listGender.Add(false);
+					}
+					if (p.ParentDad != null)
+					{
+                        listParents.Add(p.ParentDad);
+						listGender.Add(true);
+					}
+					for (int iP = 0; iP < listParents.Count; iP++)
+					{
+                        var parent = listParents[iP];
 						Point p1 = new Point(parent.Pos.X, parent.Pos.Y), p2 = new Point(p.Pos.X, p.Pos.Y);
 						PointF dV = new PointF(p2.X - p1.X, p2.Y - p1.Y);
 						float vLen = (float)Tools.GetVectLength(dV.X, dV.Y);
@@ -78,9 +96,14 @@ namespace FTreeViewer
 						vLen -= Data._size / 2 + 10;
 						dV.X *= vLen; dV.Y *= vLen;
 						p2.X = p1.X + (int)dV.X; p2.Y = p1.Y + (int)dV.Y;
-						Tools.Meth.DrawArrow(g, pen, p1, p2);
-					}
+						if (Config.UserSettings.isArrowShowsGender)
+							Tools.Meth.DrawArrow(g, listGender[iP] ? penBlue : penPurple, p1, p2);
+						else
+                            Tools.Meth.DrawArrow(g, pen, p1, p2);
+
+                    }
 					listParents.Clear();
+					listGender.Clear();
 				}
 				// nodes
 				for (int i = 0; i < Data.People.Length; i++)
@@ -263,6 +286,8 @@ namespace FTreeViewer
 					ButtonFlags |= 0b00100000; break;
 				case Keys.Right:
 					ButtonFlags |= 0b00010000; break;
+				case Keys.Escape:
+					Close(); break;
 			}
 		}
         private void Form1_KeyUp(object sender, KeyEventArgs e)
@@ -563,33 +588,21 @@ namespace FTreeViewer
         }
         private void btnIdManagement_Click(object sender, EventArgs e)
         {
-			IdManagement FIdManagement = new IdManagement(this);
+			FIdManagement FIdManagement = new FIdManagement(this);
 			FIdManagement.ShowDialog(this);
 		}
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+			Settings settings = new Settings(this);
+			settings.ShowDialog(this);
+        }
+
+        
     }
-    static class Config
-	{
-		public static int
-			maxObjs = 120,
 
-			playerSize = 50,
-			targetFPS = 100, // standard 40
-			gameTicksPS = 60, // standard 60 | influences the smoothness of steps (lower = less smooth ; higher = more smooth & maybe more CPU)
-			gameTickBase = 30, // the base speed of the game
-			playerMoveStep = 60,
-			_constPlayerMoveStep = 60, // is not modified
 
-			// TODO --> Add vertical and horizontal percent / or pxl or smth like that
 
-			windowFreeWalkAreaPerc = 30; // size of the edge area in percent of the width & height
-
-		public static double
-			scaleAccelerator = 0.1d;
-
-		public static Random rand = new Random(1337);
-
-	}
-	static class ViewPort
+    static class ViewPort
 	{
 		public static double _globalStepFactor = 1; // constant after load
 		public static double scaleX = 1d, scaleY = 1d, fpsReal = 0;
@@ -750,4 +763,36 @@ namespace FTreeViewer
 			return (phi + addition >= 0 ? 0 : full) + (phi + addition) % full;
 		}
 	}
+    public static class Config
+    {
+        public static int
+            maxObjs = 120,
+
+            playerSize = 50,
+            targetFPS = 100, // standard 40
+            gameTicksPS = 60, // standard 60 | influences the smoothness of steps (lower = less smooth ; higher = more smooth & maybe more CPU)
+            gameTickBase = 30, // the base speed of the game
+            playerMoveStep = 60,
+            _constPlayerMoveStep = 60, // is not modified
+
+            // TODO --> Add vertical and horizontal percent / or pxl or smth like that
+
+            windowFreeWalkAreaPerc = 30; // size of the edge area in percent of the width & height
+
+        public static double
+            scaleAccelerator = 0.1d;
+
+        public static Random rand = new Random(1337);
+
+        public static class UserSettings
+        {
+            public static bool isArrowShowsGender = false;
+        }
+        public static class meta
+        {
+            public static string VERSION = "1.0.0";
+            public static string VERSION_TYPE = "Debug";
+            public static string VERSION_DATE = "May 2023";
+        }
+    }
 }

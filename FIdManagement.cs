@@ -11,10 +11,10 @@ using static FTreeViewer.Form1;
 
 namespace FTreeViewer
 {
-    public partial class IdManagement : Form
+    public partial class FIdManagement : Form
     {
         Form1 parent;
-        public IdManagement(Form1 parent)
+        public FIdManagement(Form1 parent)
         {
             this.parent = parent;
             InitializeComponent();
@@ -79,7 +79,7 @@ namespace FTreeViewer
                 range.Clear();
             }
         }
-        private void btnRessurect_Click(object sender, EventArgs e)
+        private void btnRessurect_Click(object sender, EventArgs e) //
         {
             var items = listBx.CheckedIndices;
             for (int i = 0; i < items.Count; i++)

@@ -51,6 +51,7 @@
             this.btnJump = new System.Windows.Forms.Button();
             this.btnAbout = new System.Windows.Forms.Button();
             this.btnIdManagement = new System.Windows.Forms.Button();
+            this.btnSettings = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nUD_Id)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nUD_NLStartNode)).BeginInit();
@@ -269,11 +270,23 @@
             this.btnIdManagement.UseVisualStyleBackColor = true;
             this.btnIdManagement.Click += new System.EventHandler(this.btnIdManagement_Click);
             // 
+            // btnSettings
+            // 
+            this.btnSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSettings.Location = new System.Drawing.Point(12, 477);
+            this.btnSettings.Name = "btnSettings";
+            this.btnSettings.Size = new System.Drawing.Size(75, 23);
+            this.btnSettings.TabIndex = 11;
+            this.btnSettings.Text = "Settings";
+            this.btnSettings.UseVisualStyleBackColor = true;
+            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(989, 541);
+            this.Controls.Add(this.btnSettings);
             this.Controls.Add(this.btnIdManagement);
             this.Controls.Add(this.btnAbout);
             this.Controls.Add(this.btnJump);
@@ -290,6 +303,7 @@
             this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "FTreeViewer";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
@@ -330,6 +344,7 @@
         private System.Windows.Forms.Button btnJump;
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.Button btnIdManagement;
+        private System.Windows.Forms.Button btnSettings;
     }
 }
 
