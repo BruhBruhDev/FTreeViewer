@@ -52,6 +52,12 @@
     <Compile Include="About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
+    <Compile Include="ConfirmCloseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfirmCloseDialog.Designer.cs">
+      <DependentUpon>ConfirmCloseDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -59,11 +65,17 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="IdManagement.cs">
+    <Compile Include="FSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="IdManagement.Designer.cs">
-      <DependentUpon>IdManagement.cs</DependentUpon>
+    <Compile Include="FSettings.Designer.cs">
+      <DependentUpon>FSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FIdManagement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FIdManagement.Designer.cs">
+      <DependentUpon>FIdManagement.cs</DependentUpon>
     </Compile>
     <Compile Include="InputPrompt.cs">
       <SubType>Form</SubType>
@@ -77,11 +89,17 @@
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ConfirmCloseDialog.resx">
+      <DependentUpon>ConfirmCloseDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="IdManagement.resx">
-      <DependentUpon>IdManagement.cs</DependentUpon>
+    <EmbeddedResource Include="FSettings.resx">
+      <DependentUpon>FSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FIdManagement.resx">
+      <DependentUpon>FIdManagement.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="InputPrompt.resx">
       <DependentUpon>InputPrompt.cs</DependentUpon>

@@ -76,6 +76,7 @@
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "About";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "About";
             this.Load += new System.EventHandler(this.About_Load);
             this.ResumeLayout(false);

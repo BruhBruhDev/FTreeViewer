@@ -1,6 +1,6 @@
 ﻿namespace FTreeViewer
 {
-    partial class IdManagement
+    partial class FIdManagement
     {
         /// <summary>
         /// Required designer variable.
@@ -145,7 +145,7 @@
             this.btnShiftDown.UseVisualStyleBackColor = true;
             this.btnShiftDown.Click += new System.EventHandler(this.btnShiftDown_Click);
             // 
-            // IdManagement
+            // FIdManagement
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -160,7 +160,8 @@
             this.Controls.Add(this.listBx);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Name = "IdManagement";
+            this.Name = "FIdManagement";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "IdManagement";
             this.Load += new System.EventHandler(this.IdManagement_Load);
             this.ResumeLayout(false);
