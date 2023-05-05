@@ -195,19 +195,20 @@ namespace FTreeViewer
             {
 				double x, y;
 				
-				double smallstepsize = 1 / ViewPort.scaleX;
-				x = smallstepsize *
+				// arrow keys
+				x = Config.playerMoveStep / 10d *
 						(((ButtonFlags & 0b00010000) != 0x0 ? 1 : 0)
 						- ((ButtonFlags & 0b01000000) != 0x0 ? 1 : 0));
-				y = smallstepsize *
+				y = Config.playerMoveStep / 10d *
 						(((ButtonFlags & 0b10000000) != 0x0 ? 1 : 0)
 						- ((ButtonFlags & 0b00100000) != 0x0 ? 1 : 0));
                 x = Math.Abs(x) >= 1 ? x : x == 0 ? 0 : 1;
 				y = Math.Abs(y) >= 1 ? y : y == 0 ? 0 : 1;
-				x += smallstepsize / 20 *
+				// wasd
+				x += Config.playerMoveStep *
 						(((ButtonFlags & 0b00000001) != 0x0 ? 1 : 0)
 						- ((ButtonFlags & 0b00000100) != 0x0 ? 1 : 0));
-				y += smallstepsize / 20 *
+				y += Config.playerMoveStep *
 						(((ButtonFlags & 0b00001000) != 0x0 ? 1 : 0)
 						- ((ButtonFlags & 0b00000010) != 0x0 ? 1 : 0));
 				ViewPort.player1MoveVect.X = (int)x;
@@ -228,7 +229,7 @@ namespace FTreeViewer
 					ViewPort.cameraPosX += (int)(ViewPort.player1MoveVect.X * ViewPort._globalStepFactor);
 				//if (!windowFreeWalkArea.Contains(new Point(center.X, rect.Location.Y)))
 					ViewPort.cameraPosY += (int)(ViewPort.player1MoveVect.Y * ViewPort._globalStepFactor);
-				CanvasToBeChanged = true;
+				CanvasToBeChanged = x != 0 || y != 0; // if there are changes
             }
 			if (dragSelectedObject && dragSelectedObjectId != -1 && dragSelectedObjectId < Data.GetAmountPeople()
 				&& timeToStartDragging < DateTime.Now)
@@ -772,7 +773,7 @@ namespace FTreeViewer
             targetFPS = 100, // standard 40
             gameTicksPS = 60, // standard 60 | influences the smoothness of steps (lower = less smooth ; higher = more smooth & maybe more CPU)
             gameTickBase = 30, // the base speed of the game
-            playerMoveStep = 60,
+            playerMoveStep = 40,
             _constPlayerMoveStep = 60, // is not modified
 
             // TODO --> Add vertical and horizontal percent / or pxl or smth like that
