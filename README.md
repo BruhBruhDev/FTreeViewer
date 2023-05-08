@@ -12,11 +12,11 @@ Features:
 
 # Controls
 
-left mouse button click: - select a node
-left mouse button hold: - drag
-middle mouse button: - pan
-right mouse button: - edit properties
-scroll: - zoom
+- left mouse button click: - select a node
+- left mouse button hold: - drag
+- middle mouse button: - pan
+- right mouse button: - edit properties
+- scroll: - zoom
 
-wasd: - navigation
-arrow keys: - fine navigation
+- wasd: - navigation
+- arrow keys: - fine navigation
