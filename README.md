@@ -1,6 +1,8 @@
 # FTreeViewer
 With FTreeViewer you can organize and illustrate your family tree in a manageble way to keep an overview.
 
+![screenshot 1.0.0](/screenshots/Screenshot-1.0.0.png?raw=true "1.0.0")
+
 Features:
 - add person
 - connect parents/children
