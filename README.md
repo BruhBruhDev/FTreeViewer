@@ -2,6 +2,7 @@
 With FTreeViewer you can organize and illustrate your family tree in a manageable way.
 
 ![screenshot 1.0.0](/screenshots/Screenshot-1.0.0.png?raw=true "1.0.0")
+[This is an example layout showing the royal family tree. The example file is also included in the Release]
 
 # Features:
 - add person
