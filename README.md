@@ -4,6 +4,9 @@ With FTreeViewer you can organize and illustrate your family tree in a manageabl
 ![screenshot 1.0.0](/screenshots/Screenshot-1.0.0.png?raw=true "1.0.0")
 [This is an example layout showing the royal family tree. The example file is also included in the Release]
 
+# Where to get the .exe?
+On desktop look on the right side under "Releases" or you can simply click this ![link](https://github.com/BruhBruhDev/FTreeViewer/releases/latest) for the latest release
+
 # Features:
 - add person
 - connect parents/children
