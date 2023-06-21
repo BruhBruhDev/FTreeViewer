@@ -329,8 +329,18 @@ namespace FTreeViewer
         }
         private void btnSaveLayout_Click(object sender, EventArgs e)
         {
-			var result = saveFileDialog1.ShowDialog();
-			if (result != DialogResult.OK) return;
+			var arr = Data.ListDataThatNeedsEscaping();
+            if (arr.Length != 0)
+			{
+				var f = new FConfirmSaveFile(
+                    "WARNING POSSIBLE INCOMPATABILITY: Some labels contain commas or line breaks. File may be read incorrectly by other programs, because data is saved using the escape character (\\) instead of the double quotes(\"). In this case consider recoding the file with specialized .csv software or tool. \n"
+                    + "Node IDs: " + string.Join(",",arr));
+				f.ShowDialog(this);
+				Config.UserSettings.saveIncompatible_dontAskAgain = f.flagDontAskAgain;
+				if (!f.flagConfirm) return;
+			}
+            var result = saveFileDialog1.ShowDialog();
+            if (result != DialogResult.OK) return;
             string s = saveFileDialog1.FileName;
 			Data.WriteCSV(s);
         }
@@ -787,12 +797,13 @@ namespace FTreeViewer
         public static class UserSettings
         {
             public static bool isArrowShowsGender = false;
+			public static bool saveIncompatible_dontAskAgain = false;
         }
         public static class meta
         {
-            public static string VERSION = "1.0.0";
+            public static string VERSION = "1.0.1";
             public static string VERSION_TYPE = "Debug";
-            public static string VERSION_DATE = "May 2023";
+            public static string VERSION_DATE = "June 2023";
         }
     }
 }

@@ -18,7 +18,9 @@ namespace FTreeViewer
         }
         private void About_Load(object sender, EventArgs e)
         {
+            
             linktext = linkLabel1.Text;
+            //linkLabel1.Text = "\u21F1" + linktext;
             lblAppVersion.Text = "Application Version:\n"+ Config.meta.VERSION + " " + Config.meta.VERSION_TYPE + " - " + Config.meta.VERSION_DATE;
         }
         string linktext;
@@ -29,7 +31,7 @@ namespace FTreeViewer
                 System.Diagnostics.Process.Start(linktext);
                 linkLabel1.Text = linktext;
             }
-            catch 
+            catch
             {
                 linkLabel1.Text = linkLabel1.Text + " [ ! ]";
             }

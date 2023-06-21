@@ -177,17 +177,47 @@ namespace FTreeViewer
             {
                 Person p = People[i];
                 if (p == null) continue;
-                string row = string.Format(_datasetFormat, p.id,
+                string row = PersonToString(p);
+                arr = Encoding.ASCII.GetBytes(row);
+                fs.Write(arr, 0, arr.Length);
+            }
+            fs.Close();
+        }
+        public static int[] ListDataThatNeedsEscaping()
+        {
+            var list = new List<int>();
+            for (int i = 0; i < GetAmountPeople(); i++)
+            {
+                Person p = People[i];
+                if (p == null) continue;
+                if (PersonToString(p).Contains('\\'))
+                    list.Add(p.id);
+            }
+            return list.ToArray();
+        }
+        public static bool DoesDataNeedEscaping() // this one is kinda redundant
+        {
+            bool b = false;
+            for (int i = 0; i < GetAmountPeople(); i++)
+            {
+                Person p = People[i];
+                if (p == null) continue;
+                if (PersonToString(p).Contains('\\'))
+                {
+                    b = true;
+                    break;
+                }
+            }
+            return b;
+        }
+        private static string PersonToString(Person p)
+        {
+            return string.Format(_datasetFormat, p.id,
                     p.ParentMum == null ? _null : p.ParentMum.id.ToString(),
                     p.ParentDad == null ? _null : p.ParentDad.id.ToString(),
                     FilterStr(p.FirstName), FilterStr(p.FullName),
                     p.undefinedPos ? _null : p.Pos.X.ToString(),
                     p.undefinedPos ? _null : p.Pos.Y.ToString());
-                
-                arr = Encoding.ASCII.GetBytes(row);
-                fs.Write(arr, 0, arr.Length);
-            }
-            fs.Close();
         }
         private static string FilterStr(string s)
         {
