@@ -18,7 +18,7 @@ On desktop look on the right side under "Releases" or you can simply click this 
 # Export / Import
 - You can always save or load the current layout of nodes
 - Data is saved in an easy and universal .csv format
-- Note: Using commas in any string (name, surname) will be saved in .csv using the escape character '\'. Other applications may not interpret it correctly.
+- Note: Using commas in any string (name, surname) will be saved in .csv using the escape character '\\'. Other applications may not interpret it correctly.
 
 # Controls
 
