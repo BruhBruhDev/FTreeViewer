@@ -266,7 +266,7 @@
             this.btnIdManagement.Name = "btnIdManagement";
             this.btnIdManagement.Size = new System.Drawing.Size(94, 23);
             this.btnIdManagement.TabIndex = 10;
-            this.btnIdManagement.Text = "Id Management";
+            this.btnIdManagement.Text = "ID Management";
             this.btnIdManagement.UseVisualStyleBackColor = true;
             this.btnIdManagement.Click += new System.EventHandler(this.btnIdManagement_Click);
             // 
