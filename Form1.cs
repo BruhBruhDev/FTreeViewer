@@ -330,7 +330,7 @@ namespace FTreeViewer
         private void btnSaveLayout_Click(object sender, EventArgs e)
         {
 			var arr = Data.ListDataThatNeedsEscaping();
-            if (arr.Length != 0)
+            if (arr.Length != 0 && !Config.UserSettings.saveIncompatible_dontAskAgain)
 			{
 				var f = new FConfirmSaveFile(
                     "WARNING POSSIBLE INCOMPATABILITY: Some labels contain commas or line breaks. File may be read incorrectly by other programs, because data is saved using the escape character (\\) instead of the double quotes(\"). In this case consider recoding the file with specialized .csv software or tool. \n"
