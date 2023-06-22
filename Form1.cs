@@ -801,7 +801,7 @@ namespace FTreeViewer
         }
         public static class meta
         {
-            public static string VERSION = "1.0.1";
+            public static string VERSION = "1.0.2";
             public static string VERSION_TYPE = "Debug";
             public static string VERSION_DATE = "June 2023";
         }
